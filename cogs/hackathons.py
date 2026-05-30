@@ -1,6 +1,4 @@
-"""
-Hackathon discovery: /hackathons
-"""
+"""Hackathon discovery: /hackathons (served from 1-hour cache)."""
 from __future__ import annotations
 
 import logging
@@ -10,8 +8,10 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from config import HACKATHONS_COOLDOWN
 from services.hackathon_service import fetch_upcoming
 from utils.helpers import format_date
+from utils.rate_limiter import cooldown
 
 log = logging.getLogger("roommate.hackathons")
 
@@ -24,6 +24,7 @@ class HackathonsCog(commands.Cog):
         name="hackathons",
         description="Browse top upcoming global hackathons 🌍",
     )
+    @cooldown(HACKATHONS_COOLDOWN)
     async def hackathons(self, interaction: discord.Interaction) -> None:
         await interaction.response.defer()
 
@@ -67,7 +68,7 @@ class HackathonsCog(commands.Cog):
                 inline=False,
             )
 
-        embed.set_footer(text="Roommate Bot • Updated daily • /hackathons")
+        embed.set_footer(text="Roommate Bot • Cached hourly • /hackathons")
         await interaction.followup.send(embed=embed)
 
 
